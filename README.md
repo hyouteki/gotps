@@ -54,3 +54,7 @@ curl -X POST http://0.0.0.0:3000/register_device -H "Content-Type: application/j
 - `200 OK`: The device was registered successfully.
 - `400 Bad Request`: The request is missing required fields or has invalid data.
 - `500 Internal Server Error`: Unable to process the request. Possible reasons: Error occurred while inserting data into the database for user registration.
+
+# Getting Started
+1. Ensure you have Go installed and set up on your system.
+2. Run the server using the command `go run main.go`.
