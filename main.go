@@ -4,58 +4,97 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"database/sql"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type OtpRequest struct {
 	Otp string `json:"otp"`
 }
 
-type DeviceRegistration struct {
-	UUID     string `json:"uuid"`
-	FCMToken string `json:"fcm_token"`
+type Device struct {
+	Uuid     string `json:"uuid"`
+	FcmToken string `json:"fcm_token"`
 }
 
-var deviceTokens = make(map[string]string)
+var db *sql.DB
 
-func receiveOtp(writer http.ResponseWriter, req *http.Request) {
+func InitDb() error {
+    var err error
+    db, err = sql.Open("sqlite3", "./devices.db")
+    if err != nil {
+        return fmt.Errorf("error: failed to open database: %w\n", err)
+    }
+    
+    var createTableQuery string = `
+    CREATE TABLE IF NOT EXISTS devices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT NOT NULL UNIQUE,
+        fcm_token TEXT NOT NULL UNIQUE
+    );`
+    
+    _, err = db.Exec(createTableQuery)
+    if err != nil {
+        return fmt.Errorf("error: failed to execute `createTableQuery`: %w\n", err)
+    }
+    
+    return nil
+}
+
+func JsonResponse(writer http.ResponseWriter, message string, statusCode int) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(statusCode)
+	json.NewEncoder(writer).Encode(map[string]string{"message": message})
+}
+
+func ReceiveOtp(writer http.ResponseWriter, req *http.Request) {
 	var otpReq OtpRequest
-
-	err := json.NewDecoder(req.Body).Decode(&otpReq)
+    
+    var err error = json.NewDecoder(req.Body).Decode(&otpReq)
 	if err != nil || otpReq.Otp == "" {
 		fmt.Println("error: no OTP provided")
-		http.Error(writer, "No OTP provided", http.StatusBadRequest)
+		JsonResponse(writer, "No OTP provided", http.StatusBadRequest)
 		return
 	}
 
 	fmt.Printf("info: received OTP: %s\n", otpReq.Otp)
-
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-	json.NewEncoder(writer).Encode(map[string]string{"message": "OTP received successfully"})
+	JsonResponse(writer, "OTP received successfully", http.StatusOK)
 }
 
-func registerDevice(writer http.ResponseWriter, req *http.Request) {
-	var registration DeviceRegistration
+func RegisterDevice(writer http.ResponseWriter, req *http.Request) {
+	var device Device
 
-	err := json.NewDecoder(req.Body).Decode(&registration)
-	if err != nil || registration.UUID == "" || registration.FCMToken == "" {
-		fmt.Println("error: invalid device registration")
-		http.Error(writer, "Invalid device registration", http.StatusBadRequest)
+    var err error = json.NewDecoder(req.Body).Decode(&device)
+	if err != nil || device.Uuid == "" || device.FcmToken == "" {
+		fmt.Println("error: invalid device registration request")
+		JsonResponse(writer, "Invalid device registration request", http.StatusBadRequest)
 		return
 	}
 
-	deviceTokens[registration.UUID] = registration.FCMToken
+	var insertQuery string = `INSERT OR REPLACE INTO devices (uuid, fcm_token) VALUES (?, ?)`
+	_, err = db.Exec(insertQuery, device.Uuid, device.FcmToken);
+	if err != nil {
+	    fmt.Errorf("error: failed to execute `insertQuery`: %w\n", err);
+	    JsonResponse(writer, "Failed to register device", http.StatusInternalServerError)
+        return
+	}
+	
 	fmt.Printf("info: registered device with UUID: %s, FCM token: %s\n",
-		registration.UUID, registration.FCMToken)
-
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusOK)
-	json.NewEncoder(writer).Encode(map[string]string{"message": "Device registered successfully"})
+		device.Uuid, device.FcmToken)
+	JsonResponse(writer, "Device registered successfully", http.StatusOK)
 }
 
 func main() {
-	http.HandleFunc("/receive_otp", receiveOtp)
-	http.HandleFunc("/register_device", registerDevice)
+	err := InitDb()
+    if err != nil {
+        fmt.Println("error: failed to initialize database:", err)
+        return
+    }
+	fmt.Println("info: database initialized")
+	defer db.Close()
+	
+	http.HandleFunc("/receive_otp", ReceiveOtp)
+	http.HandleFunc("/register_device", RegisterDevice)
 
 	var ip_port string = "0.0.0.0:3000"
 	fmt.Printf("info: server is running at http://%s\n", ip_port)
