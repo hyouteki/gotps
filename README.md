@@ -10,9 +10,9 @@ Server exposes two endpoints.
 - **Description**: Receives an OTP sent from the client and validates its presence in the request. If valid, a success message is returned.
 
 ### Request Body
-| Field | Type   | Description             | Required |
-|-------|--------|-------------------------|----------|
-| otp   | String | The OTP to be verified. | Yes      |
+| Field | Type   | Description            | Required |
+|-------|--------|------------------------|----------|
+| otp   | String | The OTP to be verified | Yes      |
 
 ### Example
 ```bash
@@ -34,10 +34,10 @@ curl -X POST http://0.0.0.0:3000/receive_otp -H "Content-Type: application/json"
 - **Description**: Registers a device using the provided UUID and FCMToken. If successful, the server stores the device's FCM token using the UUID as a key.
 
 ### Request Body
-| Field	    | Type	 | Description	                                      | Required |
-|-----------|--------|----------------------------------------------------|----------|
-| uuid	    | String | The unique identifier for the device.              | Yes      |
-| fcm_token	| String | The Firebase Cloud Messaging token for the device.	| Yes      |
+| Field	    | Type	 | Description	                                     | Required |
+|-----------|--------|---------------------------------------------------|----------|
+| uuid	    | String | The unique identifier for the device              | Yes      |
+| fcm_token	| String | The Firebase Cloud Messaging token for the device | Yes      |
 
 ### Example
 ```bash
@@ -53,3 +53,4 @@ curl -X POST http://0.0.0.0:3000/register_device -H "Content-Type: application/j
 ### Responses
 - `200 OK`: The device was registered successfully.
 - `400 Bad Request`: The request is missing required fields or has invalid data.
+- `500 Internal Server Error`: Unable to process the request. Possible reasons: Error occurred while inserting data into the database for user registration.
