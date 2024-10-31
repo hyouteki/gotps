@@ -33,23 +33,23 @@ func ReceiveOtpHandler(writer http.ResponseWriter, req *http.Request) {
 }
 
 func RegisterDeviceHandler(writer http.ResponseWriter, req *http.Request) {
-	var device database.Device
+	var user database.User
 
-    var err error = json.NewDecoder(req.Body).Decode(&device)
-	if err != nil || device.Uuid == "" || device.FcmToken == "" {
-		log.Println("error: invalid device registration request")
-		JsonResponse(writer, "Invalid device registration request", http.StatusBadRequest)
+    var err error = json.NewDecoder(req.Body).Decode(&user)
+	if err != nil || user.DeviceUuid == "" || user.DeviceFcmToken == "" {
+		log.Println("error: invalid user registration request")
+		JsonResponse(writer, "Invalid user registration request", http.StatusBadRequest)
 		return
 	}
 
-	err = database.RegisterDevice(device);
+	err = database.RegisterDevice(user);
 	if err != nil {
-	    log.Printf("error: failed to register device: %v\n", err);
-	    JsonResponse(writer, "Failed to register device", http.StatusInternalServerError)
+	    log.Printf("error: failed to register user: %v\n", err);
+	    JsonResponse(writer, "Failed to register user", http.StatusInternalServerError)
         return
 	}
 	
-	log.Printf("info: registered device with UUID: %s, FCM token: %s\n",
-		device.Uuid, device.FcmToken)
-	JsonResponse(writer, "Device registered successfully", http.StatusOK)
+	log.Printf("info: registered user with UUID: %s, FCM token: %s\n",
+		user.DeviceUuid, user.DeviceFcmToken)
+	JsonResponse(writer, "User registered successfully", http.StatusOK)
 }

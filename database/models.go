@@ -4,16 +4,16 @@ import (
 	"log"
 )
 
-type Device struct {
-	Uuid string `json:"uuid"`
-	FcmToken string `json:"fcm_token"`
+type User struct {
+	DeviceUuid string `json:"uuid"`
+	DeviceFcmToken string `json:"fcm_token"`
 }
 
-func RegisterDevice(device Device) error {
-	var query string = `INSERT OR REPLACE INTO devices (uuid, fcm_token) VALUES (?, ?)`
-	_, err := db.Exec(query, device.Uuid, device.FcmToken)
+func RegisterDevice(user User) error {
+	var query string = `INSERT OR REPLACE INTO users (device_uuid, device_fcm_token) VALUES (?, ?)`
+	_, err := db.Exec(query, user.DeviceUuid, user.DeviceFcmToken)
 	if err != nil {
-		log.Printf("error: failed to execute insert device query: %v\n", err)
+		log.Printf("error: failed to insert user into database: %v\n", err)
 		return err
 	}
 	return nil
