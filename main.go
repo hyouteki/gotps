@@ -8,7 +8,7 @@ import (
 	"gotps/api"
 )
 
-func main() {
+func main() {	
 	err := database.Connect("devices.db")
     if err != nil {
         log.Fatal("error: failed to connect database: ", err)
