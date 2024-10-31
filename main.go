@@ -15,7 +15,7 @@ func main() {
     }
 	log.Println("info: database connected")
 
-	err = database.Init("devices.sql")
+	err = database.Init("gotps.sql")
 	if err != nil {
         log.Fatal("error: failed to initiliaze database: ", err)
     }
