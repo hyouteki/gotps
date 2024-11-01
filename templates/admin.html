@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>gotps - Admin Panel</title>
+    <!-- AdminLTE and Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="hold-transition sidebar-mini layout-fixed">
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <aside class="main-sidebar sidebar-dark-primary elevation-4">        
+        <!-- Sidebar Menu -->
+        <div class="sidebar">
+          <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" role="menu">
+              <!-- Database Viewer Tab -->
+              <li class="nav-item">
+                <a href="#" class="nav-link active" id="dbViewerTab">
+                  <i class="nav-icon fas fa-database"></i>
+                  <p>Database Viewer</p>
+                </a>
+              </li>
+              
+              <!-- Sign Out Button -->
+              <li class="nav-item mt-auto">
+                <a href="/logout" class="nav-link">
+                  <i class="nav-icon fas fa-sign-out-alt"></i>
+                  <p>Sign Out</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Content Wrapper -->
+      <div class="content-wrapper">
+        <div class="container-fluid p-4">
+          <form id="queryForm" method="post" action="/admin">
+            <div class="form-group">
+              <textarea class="form-control" id="sqlQuery" name="sqlQuery" rows="3"
+						placeholder="Enter SQL command">SELECT * FROM users</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Execute</button>
+          </form>
+		  
+          <table class="table table-bordered table-striped mt-3">
+            <thead>
+              <tr>
+                {{range $col := .Columns}}
+                <th>{{$col}}</th>
+                {{end}}
+              </tr>
+            </thead>
+            <tbody>
+              {{range .Rows}}
+              <tr>
+                {{range .}}
+                <td>{{.}}</td>
+                {{end}}
+              </tr>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- AdminLTE and jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  </body>
+</html>

@@ -43,3 +43,26 @@ func Init(sqlFilePath string) error {
 	}
 	return nil
 }
+
+func Query(query string) (*sql.Rows, error) {
+	return db.Query(query)
+}
+
+func Constructor(dbPath string, sqlFilePath string) {
+	err := Connect(dbPath)
+    if err != nil {
+        log.Fatal("error: failed to connect database: ", err)
+    }
+	log.Println("info: database connected")
+
+	err = Init(sqlFilePath)
+	if err != nil {
+        log.Fatal("error: failed to initiliaze database: ", err)
+    }
+	log.Println("info: database initialized")
+}
+
+
+func Deconstructor() {
+	db.Close()
+}

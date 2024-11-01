@@ -18,3 +18,4 @@ func RegisterDevice(user User) error {
 	}
 	return nil
 }
+

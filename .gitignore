@@ -1,3 +1,4 @@
 .emacs.custom.el
 *.db
 creds.bashrc
+logs/
